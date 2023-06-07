@@ -3,10 +3,22 @@ import json
 import gzip
 import sqlite3
 from tabulate import tabulate
+from datetime import date, datetime
 http = urllib3.PoolManager()
 
 def pretty_print_data(data):
     print(tabulate(data, headers=["Domain Code","Page Title", "View Count","Response size (bytes)"]))
+
+def format_number(number):
+    if number < 9 :
+        return str("0"+ str(number))
+def create_Url():
+    year = int(input('Enter a year: '))
+    month = format_number(int(input('Enter a month: ')))
+    day = format_number(int(input('Enter a day: ')))
+    hour = format_number(int(input('Enter the hour: ')))
+    newUrl = "https://dumps.wikimedia.org/other/pageviews/{year}/{year}-{month}/pageviews-{year}{month}{day}-{hour}0000.gz".format(year=year, month=month, day=day, hour=hour)
+    return newUrl
 
 def fetchPagesResponse():
     # resp = http.request("GET","https://dumps.wikimedia.org/other/pageviews/2023/2023-02/pageviews-20230201-010000.gz");
@@ -75,4 +87,5 @@ def wikipedia_page_views_api():
     #close the connection
     closeConnection(connection)
 
-wikipedia_page_views_api()    
+#wikipedia_page_views_api()    
+create_Url()
