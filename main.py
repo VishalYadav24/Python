@@ -5,6 +5,9 @@ import sqlite3
 from tabulate import tabulate
 from datetime import date, datetime
 http = urllib3.PoolManager()
+import requests
+
+
 
 def pretty_print_data(data):
     print(tabulate(data, headers=["Domain Code","Page Title", "View Count","Response size (bytes)"]))
@@ -12,18 +15,23 @@ def pretty_print_data(data):
 def format_number(number):
     if number < 9 :
         return str("0"+ str(number))
+    else:
+        return str(number)
 def create_Url():
-    year = int(input('Enter a year: '))
+    year = format_number(int(input('Enter a year: ')))
     month = format_number(int(input('Enter a month: ')))
     day = format_number(int(input('Enter a day: ')))
     hour = format_number(int(input('Enter the hour: ')))
     newUrl = "https://dumps.wikimedia.org/other/pageviews/{year}/{year}-{month}/pageviews-{year}{month}{day}-{hour}0000.gz".format(year=year, month=month, day=day, hour=hour)
-    return newUrl
-
-def fetchPagesResponse():
-    # resp = http.request("GET","https://dumps.wikimedia.org/other/pageviews/2023/2023-02/pageviews-20230201-010000.gz");
-    
-    with gzip.open('pageviews-20230201-000000.gz', 'rb') as f:
+    return makeRequest(newUrl,str(year+month+day))
+def makeRequest(url,filename):
+    c = filename
+    print("Requesting "+url)
+    response = requests.get(url)
+    open(filename, 'wb').write(response.content)
+    return filename
+def fetchPagesResponse(filename):
+    with gzip.open(filename, 'rb') as f:
         file_content = f.read()
         string_response = (file_content.decode())
         keys = ["domain_code", "page_title", "view_count", "response_size"]
@@ -64,8 +72,11 @@ def getAllRecords(cursorObject):
     pretty_print_data(d)
 
 def wikipedia_page_views_api():
+    #Ask user to give date and time range
+    file_name = create_Url()
+    print(file_name)
     # fetch the data
-    data = fetchPagesResponse()
+    data = fetchPagesResponse(file_name)
     # create a connection to database
     connection = createDatabase()
     # insert the data
@@ -87,5 +98,5 @@ def wikipedia_page_views_api():
     #close the connection
     closeConnection(connection)
 
-#wikipedia_page_views_api()    
-create_Url()
+wikipedia_page_views_api()    
+
